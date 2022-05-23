@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: LinkShortener.Web/Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      - MySqlConnectionString=Server=mysql;Database=link_shortener;Uid=user;Pwd=password;
+      - RedisConnectionString=redis
+      - ShorteningPrice=100
+    depends_on:
+      - redis
+      - mysql
+    links:
+      - redis
+      - mysql
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    volumes: 
+      - cache:/data
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'link_shortener'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-db:/var/lib/mysql
+
+volumes:
+  mysql-db:
+  cache:
